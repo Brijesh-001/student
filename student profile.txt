@@ -1,0 +1,396 @@
+//Floyd
+INF = float('inf')
+
+def read_matrix():
+    n = int(input("Enter number of vertices: "))
+    print("Enter cost matrix (999 for infinity):")
+    a = [list(map(int, input().split())) for _ in range(n)]
+    for i in range(n):
+        for j in range(n):
+            if i != j and a[i][j] == 999:
+                a[i][j] = INF
+    return n, a
+
+def floyd_warshall(n, a):
+    for k in range(n):
+        for i in range(n):
+            for j in range(n):
+                if a[i][k] != INF and a[k][j] != INF:
+                    a[i][j] = min(a[i][j], a[i][k] + a[k][j])
+    return a
+
+def print_matrix(n, a):
+    print("All-pairs shortest path matrix:")
+    for row in a:
+        print('\t'.join("INF" if x == INF else str(x) for x in row))
+
+def main():
+    n, a = read_matrix()
+    print_matrix(n, floyd_warshall(n, a))
+
+if __name__ == "__main__":
+    main()
+
+
+//warshall
+def read_matrix():
+    n = int(input("Enter number of vertices: "))
+    print("Enter adjacency matrix (0/1):")
+    a = [list(map(int, input().split())) for _ in range(n)]
+    return n, a
+
+def warshall(n, a):
+    for k in range(n):
+        for i in range(n):
+            for j in range(n):
+                a[i][j] = a[i][j] or (a[i][k] and a[k][j])
+    return a
+
+def print_matrix(n, a):
+    print("Transitive closure matrix:")
+    for row in a:
+        print('\t'.join(str(x) for x in row))
+
+def main():
+    n, a = read_matrix()
+    print_matrix(n, warshall(n, a))
+
+if __name__ == "__main__":
+    main()
+
+
+
+
+
+
+//knapsack
+
+def knapsack(weights, profits, capacity):
+    n = len(weights)
+    V = [[0]*(capacity+1) for _ in range(n+1)]
+    Keep = [[0]*(capacity+1) for _ in range(n+1)]
+
+    for i in range(1, n+1):
+        for w in range(capacity+1):
+            if weights[i-1] <= w and profits[i-1] + V[i-1][w - weights[i-1]] > V[i-1][w]:
+                V[i][w] = profits[i-1] + V[i-1][w - weights[i-1]]
+                Keep[i][w] = 1
+            else:
+                V[i][w] = V[i-1][w]
+
+    w = capacity
+    selected = []
+    for i in range(n, 0, -1):
+        if Keep[i][w] == 1:
+            selected.append(i)
+            w -= weights[i-1]
+
+    selected.reverse()
+    return V[n][capacity], selected
+
+def main():
+    capacity = int(input("Enter max capacity of the knapsack: "))
+    n = int(input("Enter number of objects: "))
+    weights = []
+    profits = []
+
+    print("Enter weights:")
+    for i in range(n):
+        weights.append(int(input(f"Weight of item {i+1}: ")))
+    print("Enter profits:")
+    for i in range(n):
+        profits.append(int(input(f"Profit of item {i+1}: ")))
+
+    max_profit, selected_items = knapsack(weights, profits, capacity)
+    print("Selected items:", *selected_items)
+    print("Optimal solution:", max_profit)
+
+if __name__ == "__main__":
+    main()
+
+//tsp
+import itertools
+
+def tsp(cost):
+    n = len(cost)
+    dp = [[float('inf')] * n for _ in range(1 << n)]
+    dp[1][0] = 0  # Start from node 0
+
+    for mask in range(1 << n):
+        for u in range(n):
+            if mask & (1 << u):
+                for v in range(n):
+                    if not mask & (1 << v):
+                        dp[mask | (1 << v)][v] = min(
+                            dp[mask | (1 << v)][v],
+                            dp[mask][u] + cost[u][v]
+                        )
+
+    return min(dp[(1 << n) - 1][j] + cost[j][0] for j in range(1, n))
+
+def main():
+    n = int(input("Enter number of cities: "))
+    print("Enter cost matrix (space separated):")
+    cost = [list(map(int, input().split())) for _ in range(n)]
+    print("Minimum tour cost:", tsp(cost))
+
+if __name__ == "__main__":
+    main()
+
+// n queens
+
+
+
+def solve_n_queens(n):
+    solutions = []
+    board = [-1] * n  # board[i] = column of queen in row i
+
+    def is_safe(row, col):
+        for prev_row in range(row):
+            # Check same column or diagonals
+            if board[prev_row] == col or \
+               abs(board[prev_row] - col) == row - prev_row:
+                return False
+        return True
+
+    def backtrack(row=0):
+        if row == n:
+            solutions.append(board[:])
+            return
+        for col in range(n):
+            if is_safe(row, col):
+                board[row] = col
+                backtrack(row + 1)
+                board[row] = -1
+
+    backtrack()
+    return solutions
+
+def print_solutions(solutions):
+    for sol in solutions:
+        for col in sol:
+            print('. ' * col + 'Q ' + '. ' * (len(sol) - col - 1))
+        print()
+
+if __name__ == "__main__":
+    n = int(input("Enter number of queens: "))
+    sols = solve_n_queens(n)
+    print(f"Total solutions: {len(sols)}")
+    print_solutions(sols)
+
+
+
+
+
+//color
+
+
+def is_safe(graph, colors, node, c):
+    for i, connected in enumerate(graph[node]):
+        if connected == 1 and colors[i] == c:
+            return False
+    return True
+
+def graph_coloring(graph, m, colors, node=0):
+    if node == len(graph):
+        return True
+
+    for c in range(1, m + 1):
+        if is_safe(graph, colors, node, c):
+            colors[node] = c
+            if graph_coloring(graph, m, colors, node + 1):
+                return True
+            colors[node] = 0
+    return False
+
+def main():
+    n = int(input("Enter number of vertices: "))
+    print("Enter adjacency matrix row-wise (space separated 0/1):")
+    graph = [list(map(int, input().split())) for _ in range(n)]
+
+    m = int(input("Enter number of colors: "))
+    colors = [0] * n
+
+    if graph_coloring(graph, m, colors):
+        print("Coloring of graph:")
+        for i, color in enumerate(colors, start=1):
+            print(f"Vertex {i}: Color {color}")
+    else:
+        print("No solution exists with given colors.")
+
+if __name__ == "__main__":
+    main()
+
+
+
+
+//Hamiltonian
+
+
+
+
+
+def is_safe(v, graph, path, pos):
+    # Check if current vertex is adjacent to the previous vertex in the path
+    if graph[path[pos - 1]][v] == 0:
+        return False
+    # Check if the vertex has already been included in the path
+    if v in path:
+        return False
+    return True
+
+def ham_cycle_util(graph, path, pos):
+    n = len(graph)
+    # Base case: all vertices included, check if last vertex connects to first
+    if pos == n:
+        if graph[path[pos - 1]][path[0]] == 1:
+            return True
+        else:
+            return False
+    
+    # Try different vertices as next candidate
+    for v in range(1, n):
+        if is_safe(v, graph, path, pos):
+            path[pos] = v
+            if ham_cycle_util(graph, path, pos + 1):
+                return True
+            # Backtrack
+            path[pos] = -1
+    return False
+
+def ham_cycle(graph):
+    n = len(graph)
+    path = [-1] * n
+    path[0] = 0  # Start at vertex 0
+
+    if not ham_cycle_util(graph, path, 1):
+        print("No Hamiltonian cycle exists")
+        return False
+    
+    # Print the Hamiltonian cycle
+    print("Hamiltonian cycle exists:")
+    for vertex in path:
+        print(vertex, end=" -> ")
+    print(path[0])
+    return True
+
+def main():
+    n = int(input("Enter number of vertices: "))
+    print("Enter adjacency matrix row by row:")
+    graph = []
+    for _ in range(n):
+        row = list(map(int, input().split()))
+        graph.append(row)
+    
+    ham_cycle(graph)
+
+if __name__ == "__main__":
+    main()
+
+
+
+
+
+//sum of subsets
+
+
+
+
+
+def sum_of_subsets(nums, target):
+    result = []
+    subset = []
+
+    def backtrack(start, current_sum):
+        if current_sum == target:
+            print(subset)
+            return
+        if current_sum > target:
+            return
+        for i in range(start, len(nums)):
+            subset.append(nums[i])
+            backtrack(i + 1, current_sum + nums[i])
+            subset.pop()
+
+    backtrack(0, 0)
+
+def main():
+    n = int(input("Enter number of elements: "))
+    nums = list(map(int, input("Enter elements: ").split()))
+    target = int(input("Enter target sum: "))
+    print("Subsets with sum", target, "are:")
+    sum_of_subsets(nums, target)
+
+if __name__ == "__main__":
+    main()
+
+
+
+
+//assignment
+
+def hungarian_algorithm(cost):
+    n = len(cost)
+    u = [0] * (n + 1)
+    v = [0] * (n + 1)
+    p = [0] * (n + 1)
+    way = [0] * (n + 1)
+
+    for i in range(1, n + 1):
+        p[0] = i
+        j0 = 0
+        minv = [float('inf')] * (n + 1)
+        used = [False] * (n + 1)
+        while True:
+            used[j0] = True
+            i0 = p[j0]
+            j1 = 0
+            delta = float('inf')
+            for j in range(1, n + 1):
+                if not used[j]:
+                    cur = cost[i0-1][j-1] - u[i0] - v[j]
+                    if cur < minv[j]:
+                        minv[j] = cur
+                        way[j] = j0
+                    if minv[j] < delta:
+                        delta = minv[j]
+                        j1 = j
+            for j in range(n + 1):
+                if used[j]:
+                    u[p[j]] += delta
+                    v[j] -= delta
+                else:
+                    minv[j] -= delta
+            j0 = j1
+            if p[j0] == 0:
+                break
+        while True:
+            j1 = way[j0]
+            p[j0] = p[j1]
+            j0 = j1
+            if j0 == 0:
+                break
+
+    # p[j] = i means job j is assigned to person i
+    assignment = [0] * n
+    for j in range(1, n + 1):
+        assignment[p[j]-1] = j - 1
+
+    total_cost = sum(cost[i][assignment[i]] for i in range(n))
+    return total_cost, assignment
+
+def main():
+    n = int(input("Enter number of jobs/people: "))
+    print(f"Enter the cost matrix ({n} x {n}):")
+    cost = [list(map(int, input().split())) for _ in range(n)]
+
+    total_cost, assignment = hungarian_algorithm(cost)
+
+    print("Optimal assignment:")
+    for i, job in enumerate(assignment):
+        print(f"Person {i+1} assigned to Job {job+1} with cost {cost[i][job]}")
+    print("Total minimum cost:", total_cost)
+
+if __name__ == "__main__":
+    main()
+
