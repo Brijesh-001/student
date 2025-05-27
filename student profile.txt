@@ -1,4 +1,9 @@
 //Floyd
+
+
+
+
+
 INF = float('inf')
 
 def read_matrix():
@@ -33,6 +38,10 @@ if __name__ == "__main__":
 
 
 //warshall
+
+
+
+
 def read_matrix():
     n = int(input("Enter number of vertices: "))
     print("Enter adjacency matrix (0/1):")
@@ -64,6 +73,10 @@ if __name__ == "__main__":
 
 
 //knapsack
+
+
+
+
 
 def knapsack(weights, profits, capacity):
     n = len(weights)
@@ -108,7 +121,13 @@ def main():
 if __name__ == "__main__":
     main()
 
+
+
 //tsp
+
+
+
+
 import itertools
 
 def tsp(cost):
@@ -183,6 +202,10 @@ if __name__ == "__main__":
 
 
 //color
+
+
+
+
 
 
 def is_safe(graph, colors, node, c):
@@ -327,7 +350,13 @@ if __name__ == "__main__":
 
 
 
+
 //assignment
+
+
+
+
+
 
 def hungarian_algorithm(cost):
     n = len(cost)
